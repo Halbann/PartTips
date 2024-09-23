@@ -1,4 +1,4 @@
-Part Tips is a mod for KSP that allows the player to open the stock part tooltip on parts that already attached to a craft, even when in flight. 
+Part Tips is a mod for KSP that allows the player to open the stock part tooltip on parts that are already attached to a craft, even when in flight. 
 
 It's useful for checking the electrical and thermal requirements of your ISRU parts, for example, or checking the limitations of those solar panels you picked out earlier, and whether they supply enough juice for your ISRU parts. It's a lot to keep that all in your head and it's a bit of hassle to search for the part again in the parts list when you need a reminder.
 
