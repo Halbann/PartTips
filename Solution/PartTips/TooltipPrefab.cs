@@ -116,8 +116,12 @@ namespace PartTips
 
             // Find the image component and set the sprite.
             Image findImage = find.GetComponent<Image>();
-            Texture2D searchIcon = GameDatabase.Instance.GetTexture("Tip-off/Icons/Search_Icon", false);
-            findImage.sprite = Sprite.Create(searchIcon, new Rect(0, 0, searchIcon.width, searchIcon.height), new Vector2(0.5f, 0.5f));
+            Texture2D searchIcon = GameDatabase.Instance.GetTexture("PartTips/Icons/Search_Icon", false);
+
+            if (searchIcon == null)
+                Debug.LogError("[PartTips]: Failed to load search icon.");
+            else
+                findImage.sprite = Sprite.Create(searchIcon, new Rect(0, 0, searchIcon.width, searchIcon.height), new Vector2(0.5f, 0.5f));
 
             // Adjust the layout element. A little bit of bonus width acts as padding.
             LayoutElement findLayout = find.GetComponent<LayoutElement>();
@@ -143,18 +147,26 @@ namespace PartTips
             // Add CLOSE button to the header.
 
             Button deleteButton = Resources.FindObjectsOfTypeAll<Button>().FirstOrDefault(b => b.name == "DeleteButton");
-            Sprite deleteButtonSprite = deleteButton.GetComponent<Image>().sprite;
-            SpriteState deleteButtonSpriteState = deleteButton.spriteState;
+            
+            if (deleteButton == null)
+            {
+                Debug.LogError("[PartTips]: Failed to find the stock delete button.");
+            }
+            else
+            {
+                Sprite deleteButtonSprite = deleteButton.GetComponent<Image>().sprite;
+                SpriteState deleteButtonSpriteState = deleteButton.spriteState;
 
-            GameObject close = new GameObject("CloseButton", typeof(RectTransform), typeof(LayoutElement), typeof(Image), typeof(Button));
-            close.transform.SetParent(header.transform, false);
-            close.GetComponent<Image>().sprite = deleteButtonSprite;
+                GameObject close = new GameObject("CloseButton", typeof(RectTransform), typeof(LayoutElement), typeof(Image), typeof(Button));
+                close.transform.SetParent(header.transform, false);
+                close.GetComponent<Image>().sprite = deleteButtonSprite;
 
-            Button closeButton = close.GetComponent<Button>();
-            closeButton.spriteState = deleteButtonSpriteState;
-            closeButton.transition = Selectable.Transition.SpriteSwap;
-            close.GetComponent<LayoutElement>().preferredHeight = 20;
-            close.GetComponent<LayoutElement>().preferredWidth = 20;
+                Button closeButton = close.GetComponent<Button>();
+                closeButton.spriteState = deleteButtonSpriteState;
+                closeButton.transition = Selectable.Transition.SpriteSwap;
+                close.GetComponent<LayoutElement>().preferredHeight = 20;
+                close.GetComponent<LayoutElement>().preferredWidth = 20;
+            }
 
 
             // Need button to be right aligned, so add a SPACER to the header.

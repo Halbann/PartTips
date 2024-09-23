@@ -49,7 +49,10 @@ namespace PartTips
 
             // Create the altered tooltip prefab (once).
             if (prefab == null)
-                prefab = TooltipPrefab.Create();
+            {
+                try { prefab = TooltipPrefab.Create(); }
+                catch { Debug.LogError("[PartTips] Error: Failed to create tooltip prefab."); }
+            }
 
             // Add stock tooltip components.
             tooltipController = gameObject.AddComponent<PartListTooltipController>();

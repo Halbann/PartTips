@@ -12,19 +12,19 @@ set GAMEDIR=%NAME%
 set GAMEDATA="GameData"
 set VERSIONFILE=%GAMEDIR%.version
 
-rem Print and pause to confirm the inputs
-rem echo Target Dir: %TGTDIR%
-rem echo Plugin: "%TGTDIR%%FILENAME%"
-rem echo PDB: "%TGTDIR%%NAME%.pdb"
-rem pause
+Print and pause to confirm the inputs
+echo Target Dir: %TGTDIR%
+echo Plugin: "%TGTDIR%%FILENAME%"
+echo PDB: "%TGTDIR%%NAME%.pdb"
+echo Destination: "%GAMEDATA%\%GAMEDIR%\Plugins\"
+
+pause
 
 rem Proceed with file copying
 
-copy /Y "%TGTDIR%%FILENAME%" "%GAMEDATA%\%GAMEDIR%\Plugins"
-copy /Y "%TGTDIR%%NAME%.pdb" "%GAMEDATA%\%GAMEDIR%\Plugins"
+xcopy /Y "%TGTDIR%%FILENAME%" %GAMEDATA%\%GAMEDIR%\Plugins\ /I
+xcopy /Y "%TGTDIR%%NAME%.pdb" %GAMEDATA%\%GAMEDIR%\Plugins\ /I
 
 copy /Y %VERSIONFILE% %GAMEDATA%\%GAMEDIR%
 
 xcopy /y /s /I %GAMEDATA%\%GAMEDIR% "%H%\GameData\%GAMEDIR%"
-
-rem pause
