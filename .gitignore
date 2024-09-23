@@ -48,6 +48,7 @@ packages/
 *.dll
 *.pdb
 Builds/
+GameData/*/*.txt
 
 # unused code snippets
 Archive/
