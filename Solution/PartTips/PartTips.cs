@@ -62,11 +62,23 @@ namespace PartTips
             // We need to add the PartListTooltipMasterController to the flight scene, as it's not there by default.
             if (HighLogic.LoadedSceneIsFlight)
                 gameObject.AddComponent<PartListTooltipMasterController>();
+
+            Settings.Load();
         }
 
         protected void Update()
         {
             CheckInput();
+        }
+
+        private bool TooltipButtonDown()
+        {
+            return Input.GetKeyDown(Settings.tooltipButton);
+        }
+
+        private bool TooltipButtonUp()
+        {
+            return Input.GetKeyUp(Settings.tooltipButton);
         }
 
         private void CheckInput()
@@ -77,7 +89,7 @@ namespace PartTips
             if (HighLogic.LoadedSceneIsFlight && InputLockManager.IsLocked(ControlTypes.CAMERACONTROLS) || InputLockManager.IsLocked(ControlTypes.TWEAKABLES_ANYCONTROL))
                 return;
 
-            if (Input.GetMouseButtonDown(2))
+            if (TooltipButtonDown())
                 mmbDownTime = Time.realtimeSinceStartup;
 
             if (Input.GetMouseButtonDown(1))
@@ -91,7 +103,7 @@ namespace PartTips
                 return;
             }
 
-            if (Input.GetMouseButtonUp(2) && Time.realtimeSinceStartup - mmbDownTime < mbClickDuration)
+            if (TooltipButtonUp() && Time.realtimeSinceStartup - mmbDownTime < mbClickDuration)
             {
                 // MMB click.
 
