@@ -86,7 +86,7 @@ namespace PartTips
             if (HighLogic.LoadedSceneIsEditor && InputLockManager.IsLocked(ControlTypes.EDITOR_PAD_PICK_PLACE))
                 return;
 
-            if (HighLogic.LoadedSceneIsFlight && InputLockManager.IsLocked(ControlTypes.CAMERACONTROLS) || InputLockManager.IsLocked(ControlTypes.TWEAKABLES_ANYCONTROL))
+            if (HighLogic.LoadedSceneIsFlight && InputLockManager.IsLocked(ControlTypes.CAMERACONTROLS))
                 return;
 
             if (TooltipButtonDown())

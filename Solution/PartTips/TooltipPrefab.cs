@@ -146,23 +146,39 @@ namespace PartTips
 
             // Add CLOSE button to the header.
 
-            Button deleteButton = Resources.FindObjectsOfTypeAll<Button>().FirstOrDefault(b => b.name == "DeleteButton");
-            
-            if (deleteButton == null)
+            Texture2D closeIcon = GameDatabase.Instance.GetTexture("PartTips/Icons/CloseButton", false);
+
+            if (closeIcon == null)
             {
-                Debug.LogError("[PartTips]: Failed to find the stock delete button.");
+                Debug.LogError("[PartTips]: Failed to load close button icon.");
             }
             else
             {
-                Sprite deleteButtonSprite = deleteButton.GetComponent<Image>().sprite;
-                SpriteState deleteButtonSpriteState = deleteButton.spriteState;
+                int closeButtonSize = 48;
+                Vector2 closeButtonPivot = new Vector2(24, 24);
+
+                Sprite[] closeSprites = new Sprite[4]
+                {
+                    Sprite.Create(closeIcon, new Rect(40, 169, closeButtonSize, closeButtonSize), closeButtonPivot),
+                    Sprite.Create(closeIcon, new Rect(168, 169, closeButtonSize, closeButtonSize), closeButtonPivot),
+                    Sprite.Create(closeIcon, new Rect(40, 42, closeButtonSize, closeButtonSize), closeButtonPivot),
+                    Sprite.Create(closeIcon, new Rect(168, 42, closeButtonSize, closeButtonSize), closeButtonPivot)
+                };
+
+                SpriteState closeSpriteState = new SpriteState
+                {
+                    highlightedSprite = closeSprites[1],
+                    selectedSprite = closeSprites[1],
+                    pressedSprite = closeSprites[2],
+                    disabledSprite = closeSprites[3],
+                };
 
                 GameObject close = new GameObject("CloseButton", typeof(RectTransform), typeof(LayoutElement), typeof(Image), typeof(Button));
                 close.transform.SetParent(header.transform, false);
-                close.GetComponent<Image>().sprite = deleteButtonSprite;
+                close.GetComponent<Image>().sprite = closeSprites[0];
 
                 Button closeButton = close.GetComponent<Button>();
-                closeButton.spriteState = deleteButtonSpriteState;
+                closeButton.spriteState = closeSpriteState;
                 closeButton.transition = Selectable.Transition.SpriteSwap;
                 close.GetComponent<LayoutElement>().preferredHeight = 20;
                 close.GetComponent<LayoutElement>().preferredWidth = 20;
