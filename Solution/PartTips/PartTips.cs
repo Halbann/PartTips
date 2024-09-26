@@ -35,7 +35,7 @@ namespace PartTips
 
         // problems:
         // - localisation
-        // - get stock assets without using FindObjectsOfTypeAll
+        // - get stock tooltip without using FindObjectsOfTypeAll
 
         protected void Start()
         {
@@ -171,18 +171,36 @@ namespace PartTips
             tooltipController.editorPartIcon.availablePart = dummyPartInfo;
 
             // Open and pin the tooltip.
+            PartListTooltipMasterController master = PartListTooltipMasterController.Instance;
+            bool displayExtendedInfo = master.displayExtendedInfo;
+            master.displayExtendedInfo = false; // Manually open extended info later.
+
             tooltipController.OnPointerEnter(null);
+
             UIMasterController.Instance.PinTooltip(tooltipController);
             tooltipController.pinned = true;
+            PartListTooltip tooltip = master.currentTooltip;
+
+            // If required, turn off entry purchase button and enable cost button.
+            if (tooltip.buttonPurchaseContainer.activeInHierarchy)
+            {
+                // I think requiresEntryPurchase is always on in career mode because
+                // we're using a custom PartInfo that isn't in the tech tree.
+
+                tooltip.buttonPurchaseContainer.SetActive(false);
+                tooltip.costPanel.SetActive(true);
+                tooltip.entryCost = tooltip.partInfo.entryCost;
+                tooltip.entryCostText = tooltip.entryCost.ToString("N0");
+            }
+
+            tooltip.showCostInExtendedInfo = false;
+            tooltip.requiresEntryPurchase = false;
 
             // Highlight the part in yellow.
             SetHighlight(part, true);
 
-            // Manually display the extended info in flight if it's supposed to be visible.
-            PartListTooltipMasterController master = PartListTooltipMasterController.Instance;
-            PartListTooltip tooltip = master.currentTooltip;
-            if (!master.useRenderTextureCamera)
-                tooltip.DisplayExtendedInfo(master.displayExtendedInfo, tooltipController.GetTooltipHintText(tooltip));
+            master.displayExtendedInfo = displayExtendedInfo;
+            tooltip.DisplayExtendedInfo(master.displayExtendedInfo, tooltipController.GetTooltipHintText(tooltip));
 
             // Update the custom spacer between the standard and extended info.
             tooltip.gameObject.GetChild("Body")?.GetChild("Spacer")?.SetActive(master.displayExtendedInfo);
