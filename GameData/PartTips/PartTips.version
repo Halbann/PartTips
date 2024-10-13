@@ -1,11 +1,11 @@
 {
   "NAME": "Part Tips",
-  "URL": "https://raw.githubusercontent.com/Halbann/PartTips/master/GameData/PartTips/PartTips.version",
+  "URL": "https://raw.githubusercontent.com/Halbann/PartTips/main/GameData/PartTips/PartTips.version",
   "DOWNLOAD": "https://github.com/Halbann/PartTips/releases",
   "VERSION": {
     "MAJOR": 1,
     "MINOR": 1,
-    "PATCH": 3,
+    "PATCH": 4,
     "BUILD": 0
   },
   "KSP_VERSION": {
