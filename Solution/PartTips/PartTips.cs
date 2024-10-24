@@ -2,6 +2,7 @@
 using KSP.UI;
 using KSP.UI.Screens;
 using KSP.UI.Screens.Editor;
+using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
@@ -22,7 +23,7 @@ namespace PartTips
         public static PartListTooltip prefab;
         public AvailablePart dummyPartInfo = new AvailablePart();
         private bool buttonsLinked = false;
-        
+
         private float mmbDownTime = 0f;
         private float rmbDownTime = 0f;
         public static float mbClickDuration = 0.2f;
@@ -152,6 +153,7 @@ namespace PartTips
             // We will modify this to reflect the current state of that part (resources, cost, modules etc).
 
             dummyPartInfo = new AvailablePart(part.partInfo);
+            List<AvailablePart.ModuleInfo> prevModuleInfos = dummyPartInfo.moduleInfos;
             dummyPartInfo.moduleInfos = new List<AvailablePart.ModuleInfo>();
             dummyPartInfo.resourceInfos = new List<AvailablePart.ResourceInfo>();
 
@@ -161,7 +163,36 @@ namespace PartTips
             dummyPartInfo.minimumCost = 0;
 
             // Modules.
-            PartLoader.Instance.CompilePartInfo(dummyPartInfo, part);
+
+            // Rename ModulePartVariants to prevent modification to the part instance in CompilePartInfo.
+            if (part.TryGetComponent(out ModulePartVariants variants))
+            {
+                Debug.Log("ModulePartVariants found");
+                variants.moduleName = "TemporaryRenameToAvoidSpecificCheckInCompilePartInfoIKnowThisIsMegaJank";
+            }
+
+            // Take out ModuleB9PartSwitch to prevent it from being re-initialised via GetInfo inside CompilePartInfo.
+            bool extractedB9PartSwitch = TryExtractB9PartSwitch(part, out int switcherIndex, out PartModule switcherModule);
+
+            try
+            {
+                PartLoader.Instance.CompilePartInfo(dummyPartInfo, part);
+            }
+            catch (Exception e)
+            {
+                Debug.LogError($"[PartTips] Error while compiling part info on {part.partName}: " + e.Message);
+            }
+
+            // Re-insert ModuleB9PartSwitch.
+            if (extractedB9PartSwitch)
+                InsertB9PartSwitch(part, switcherIndex, switcherModule, prevModuleInfos);
+
+            // Restore variants module name.
+            if (variants)
+            {
+                variants.moduleName = ModulePartVariants.GetTitle();
+                dummyPartInfo.variant = part.baseVariant;
+            }
 
             // Resources.
             RecompileResourceInfos(part, dummyPartInfo);
@@ -452,6 +483,42 @@ namespace PartTips
             }
 
             partInfo.resourceInfos.Sort((AvailablePart.ResourceInfo rp1, AvailablePart.ResourceInfo rp2) => rp1.resourceName.CompareTo(rp2.resourceName));
+        }
+
+        private bool TryExtractB9PartSwitch(Part part, out int switcherIndex, out PartModule switcherModule)
+        {
+            // Extract ModuleB9PartSwitch to prevent it thinking it's being initialised via GetInfo (why do they use that?).
+            switcherIndex = 0;
+            switcherModule = null;
+
+            for (int i = 0; i < part.Modules.Count; i++)
+            {
+                if (part.Modules[i].moduleName == "ModuleB9PartSwitch")
+                {
+                    switcherIndex = i;
+                    switcherModule = part.Modules[i];
+                    part.Modules.modules.RemoveAt(i);
+
+                    return true;
+                }
+            }
+
+            return false;
+        }
+
+        private void InsertB9PartSwitch(Part part, int switcherIndex, PartModule switcherModule, List<AvailablePart.ModuleInfo> prevModuleInfos)
+        {
+            // Re-insert ModuleB9PartSwitch.
+
+            if (switcherModule == null)
+                return;
+
+            part.Modules.modules.Insert(switcherIndex, switcherModule);
+            string moduleName = (switcherModule as IModuleInfo).GetModuleTitle();
+            int insert = prevModuleInfos.FindIndex(m => m.moduleName == moduleName);
+
+            if (insert != -1)
+                dummyPartInfo.moduleInfos.Insert(Mathf.Min(insert, dummyPartInfo.moduleInfos.Count), prevModuleInfos[insert]);
         }
     }
 }
