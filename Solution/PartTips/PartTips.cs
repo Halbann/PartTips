@@ -32,7 +32,6 @@ namespace PartTips
         public static float highlightSpeed = 9f;
         public static bool highlightSpin = false;
         public static Color highlightColour = new Color(1f, 0.82f, 0f, 0.66f); // yellow
-        // Color(0.68f, 1f, 0.98f, 0.66f); // blue
 
         // problems:
         // - localisation
@@ -65,6 +64,9 @@ namespace PartTips
                 gameObject.AddComponent<PartListTooltipMasterController>();
 
             Settings.Load();
+
+            // Register game events: close the tool tip when the map is opened.
+            GameEvents.OnMapEntered.Add(OnMapEntered);
         }
 
         protected void Update()
@@ -72,22 +74,34 @@ namespace PartTips
             CheckInput();
         }
 
-        private bool TooltipButtonDown()
+        protected void OnDestroy()
         {
-            return Input.GetKeyDown(Settings.tooltipButton);
+            GameEvents.OnMapEntered.Remove(OnMapEntered);
         }
 
-        private bool TooltipButtonUp()
-        {
-            return Input.GetKeyUp(Settings.tooltipButton);
-        }
+        private void OnMapEntered() =>
+            Close();
+
+        private bool TooltipButtonDown() =>
+            Input.GetKeyDown(Settings.tooltipButton) && !HoldingRightMouseButton();
+
+        private bool TooltipButtonUp() =>
+            Input.GetKeyUp(Settings.tooltipButton) && !HoldingRightMouseButton();
+
+        private bool HoldingRightMouseButton() =>
+            Settings.tooltipButton != KeyCode.Mouse1 && Input.GetKey(KeyCode.Mouse1);
 
         private void CheckInput()
         {
+            // Check control locks.
             if (HighLogic.LoadedSceneIsEditor && InputLockManager.IsLocked(ControlTypes.EDITOR_PAD_PICK_PLACE))
                 return;
 
             if (HighLogic.LoadedSceneIsFlight && InputLockManager.IsLocked(ControlTypes.CAMERACONTROLS))
+                return;
+
+            // Check map view if flight.
+            if (HighLogic.LoadedSceneIsFlight && MapView.MapIsEnabled)
                 return;
 
             if (TooltipButtonDown())
@@ -131,7 +145,7 @@ namespace PartTips
                     }
                 }
 
-                if (Mouse.HoveredPart == null || Mouse.HoveredPart == CurrentPart)
+                if (!EventSystem.current.IsPointerOverGameObject() && Mouse.HoveredPart == null || Mouse.HoveredPart == CurrentPart)
                     return;
 
                 // Open tooltip.
